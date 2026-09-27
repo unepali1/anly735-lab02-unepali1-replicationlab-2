@@ -69,3 +69,26 @@ When data cannot be redistributed, document how an authorized researcher can obt
 ## Guiding Principle
 
 Do not chase identical numbers. Investigate reproducibility.
+
+## Replication Lab #2: Reproduction Instructions
+
+This repository contains a proxy replication examining learning behavior under nonstationary conditions using a synthetic biomedical disease-prediction experiment.
+
+### Computational Environment
+
+- R version 4.6.1 (2026-06-24 ucrt)
+- Base R
+- Random seed: 735
+
+### How to Reproduce the Analysis
+
+1. Clone this repository to your local computer.
+2. Open the repository folder in RStudio.
+3. Run the analysis script:
+
+   `source("analysis/lab02_analysis.R")`
+
+4. Confirm that the script runs from beginning to end and produces the learning-trajectory results and figure.
+5. Render `replication-lab.qmd` to generate the final Word document.
+
+The experiment uses entirely synthetic data generated within the analysis script; no external dataset is required.

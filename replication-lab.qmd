@@ -11,189 +11,119 @@ bibliography: references.bib
 
 # Study
 
-**Article:** [Insert article title]
+**Article:** Plasticity Loss in Deep Reinforcement Learning: A Survey
 
-**Authors:** [Insert author(s)]
+**Authors:** Timo Klein, Christoph Luther, Manus McAuliffe, Lukas Miklautz, Claudia Plant, and Sebastian Tschiatschek
 
-**DOI/URL:** [Insert DOI or persistent link]
+**DOI/URL:** https://doi.org/10.48550/arXiv.2411.04832
 
-**Replication Type:** [Direct / Partial / Proxy]
+**Replication Type:** Proxy
 
-**Computational Environment:** [R / Python]
+**Computational Environment:** R 4.6.1 (2026-06-24 ucrt)
 
-**Primary Packages:** [List major packages]
+**Primary Packages:** Base R
 
-**Random Seed:** [Insert seed, if applicable]
+**Random Seed:** 735
 
-**Repository:** [Insert GitHub repository URL]
+**Repository:** https://github.com/unepali1/anly735-lab02-unepali1-replicationlab-2
+
 
 # 1. Research Claim
 
-## What result are you attempting to reproduce?
+Klein et al. [-@klein2026plasticity] describe plasticity as a model's ability to adapt to new learning targets and synthesize evidence that deep reinforcement learning systems can experience plasticity loss as learning conditions evolve. A key claim examined in this proxy replication is that a previously trained model may retain learned capability while becoming less effective at learning after conditions change. Importantly, a decline in performance immediately after a change is not sufficient to establish reduced plasticity; the model's subsequent learning behavior must also be examined. Therefore, this replication evaluates post-change accuracy, learning trajectory, retention of prior performance, and adaptation relative to a newly initialized model. This claim is important because models deployed under nonstationary conditions must continue adapting when relationships between predictors and outcomes change.
 
-Identify one important empirical or computational claim from the assigned paper.
-
-State:
-
-- the result or finding being examined;
-- the model or analytical approach associated with it;
-- the evaluation metric(s) used by the authors; and
-- why this result is important to the paper's contribution.
-
-Cite the original study.
-
-[Write approximately 100–150 words.]
 
 # 2. Replication Strategy
 
-## How will you investigate the claim?
+This study uses a proxy replication because Klein et al. [-@klein2026plasticity] present a survey rather than a single empirical experiment with one dataset, trained model, and learning trajectory that can be directly reproduced. To test the broader phenomenon of learning under nonstationarity, I developed a controlled synthetic biomedical experiment in R. A logistic regression model first learned to predict disease status under Condition A, after which the biomarker–disease relationship was deliberately changed in Condition B. The previously trained model then continued learning under the new condition, while a newly initialized model learned Condition B as a comparison. This design does not reproduce a specific experiment from the survey; instead, it tests whether prior learning affects subsequent adaptation, retention, and learning rate after a controlled change in the data-generating relationship.
 
-Identify your replication as:
-
-- **Direct** — using the original data/code;
-- **Partial** — using some original materials; or
-- **Proxy** — using comparable data and methods when original materials are unavailable.
-
-Briefly explain:
-
-- what materials are available;
-- what you will reproduce;
-- what must differ from the original study; and
-- why your approach provides a meaningful test or learning experience.
-
-[Write approximately 100–150 words.]
 
 # 3. Data
 
-Describe the data used for the replication.
+The replication used synthetic biomedical data generated in R specifically for this controlled experiment. The unit of analysis was a simulated patient, with 1,000 observations generated for Condition A and 1,000 for Condition B. The binary outcome represented disease status (0 = no disease; 1 = disease). Predictors included age and three hypothetical measures representing a disease-associated biomarker, inflammation, and metabolic status. Age was standardized before model training so that its scale was comparable with the other predictors. The overall disease prevalence was similar across conditions (45.0% in Condition A and 45.4% in Condition B). Nonstationarity was introduced by reversing the simulated association between the disease-associated biomarker and disease risk while keeping the other predictor relationships unchanged. These data are entirely synthetic and contain no real patient information.
 
-Include:
 
-- data source;
-- unit of analysis;
-- target/outcome variable;
-- important predictors/features;
-- sample size, when applicable;
-- preprocessing decisions; and
-- important differences from the original data.
 
-Do not include restricted, confidential, or personally identifiable data in the repository.
-
-[Write approximately 100–150 words.]
 
 # 4. Method
 
-Describe the computational approach used in your replication.
+A binary logistic regression model was implemented in base R using gradient-descent updates so that learning could be observed across epochs rather than only through a final fitted model. All model weights were initialized at zero, the learning rate was set to 0.05, and each model was trained for 40 epochs. A fixed random seed of 735 was used for reproducibility. The model first learned Condition A using age, biomarker, inflammation, and metabolic predictors. After initial training, the learned weights were retained and the same model was exposed to Condition B, where the biomarker–disease relationship had been reversed. Accuracy on Condition B was recorded after each post-change epoch, while accuracy on Condition A was simultaneously evaluated to measure retention. As a comparison baseline, a newly initialized logistic regression model was trained directly on Condition B for the same 40 epochs and with the same learning rate. Post-change learning trajectories were then compared to evaluate adaptation rate and the stability–plasticity tradeoff.
 
-Include, as appropriate:
 
-- model or algorithm;
-- train/test or validation strategy;
-- baseline/comparison model;
-- hyperparameters;
-- preprocessing or feature engineering;
-- random seed; and
-- software/packages used.
-
-The goal is to provide enough information for another researcher to understand how the analysis was conducted.
-
-[Write approximately 150–200 words.]
 
 # 5. Results
 
-Present the main results of your replication.
+The model successfully learned the initial biomedical condition, with classification accuracy increasing from 45.0% before training to 73.7% after 40 epochs. Immediately after the biomarker–disease relationship changed, accuracy on Condition B decreased to 43.4%. This initial decline represents the effect of the distributional change and was not, by itself, interpreted as evidence of plasticity loss. During subsequent training, the previously trained model continued to learn, reaching 69.9% accuracy on Condition B after 40 additional epochs. However, its retained accuracy on Condition A decreased to 58.3%. In comparison, a freshly initialized model trained directly on Condition B reached 75.8% accuracy. The post-change trajectory therefore showed continued learning alongside declining retention of the previously learned condition, demonstrating a measurable stability–plasticity tradeoff in this controlled experiment.
 
-Include at least one appropriate:
+| Measure | Accuracy |
+|---|---:|
+| Condition A before training | 45.0% |
+| Condition A after 40 epochs | 73.7% |
+| Condition B immediately after change | 43.4% |
+| Continued model on B after 40 epochs | 69.9% |
+| Fresh model on B after 40 epochs | 75.8% |
+| Condition A retention after learning B | 58.3% |
 
-- table,
-- figure, or
-- model-performance summary
+```{r}
+#| label: fig-learning-trajectory
+#| fig-cap: "Post-change learning trajectories under the simulated biomedical condition shift."
+#| echo: false
+#| results: hide
 
-generated directly from your analysis when appropriate.
+source("analysis/lab02_analysis.R")
+```
 
-Report the same evaluation metric used by the original authors whenever possible.
 
-Do not simply present output. Explain what the result means.
-
-[Insert results and approximately 100–150 words of interpretation.]
 
 # 6. Compare
 
-## How closely did your results align with the original study?
+Because Klein et al. [-@klein2026plasticity] synthesize evidence across prior deep reinforcement learning studies rather than report one directly comparable experiment, numerical accuracy values cannot be matched between the survey and this proxy replication. The relevant comparison is therefore the pattern of learning after nonstationarity. In the controlled biomedical experiment, the previously trained model initially performed poorly under the changed condition but retained the ability to learn, improving from 43.4% to 69.9% accuracy. Its adaptation was nevertheless less effective than that of the fresh model, which reached 75.8% accuracy, while retention of Condition A declined to 58.3%. Thus, the experiment produced behavior consistent with the broader stability–plasticity problem described by Klein et al.: adaptation to new learning conditions can interact with previously acquired knowledge. However, the result should not be interpreted as a direct reproduction of deep reinforcement learning plasticity loss because this experiment used synthetic biomedical data and logistic regression.
 
-Compare your result with the authors' reported result.
-
-| Evidence | Original Study | Replication |
-|---|---:|---:|
-| Primary metric | [value] | [value] |
-| Secondary metric, if applicable | [value] | [value] |
-
-Then interpret the comparison.
-
-Consider:
-
-- Was the result reproduced?
-- Was the direction of the finding consistent?
-- Was model performance similar?
-- What might explain differences?
-
-For proxy replications, focus on whether the analytical pattern or methodological insight was reproduced rather than expecting identical numerical results.
-
-[Write approximately 150–200 words.]
+| Evidence | Klein et al. Survey | Proxy Replication |
+|---|---|---:|
+| Nonstationarity | Changing learning conditions are central to the plasticity problem | Biomarker–disease relationship deliberately changed |
+| Post-change learning | Plasticity concerns the ability to continue adapting | 43.4% → 69.9% |
+| Fresh-model comparison | Newly initialized models can provide evidence about learning capacity | Fresh model reached 75.8% |
+| Prior-task retention | Stability and plasticity may be in tension | Condition A declined to 58.3% |
 
 # 7. Reproducibility Check
 
-Evaluate the reproducibility of the original study and your own analysis.
+- [x] Data source documented
+- [x] Code runs from beginning to end
+- [x] Computational environment identified
+- [x] Software/packages documented
+- [x] Package versions documented when relevant
+- [x] Random seed documented when applicable
+- [x] Key preprocessing steps documented
+- [x] Evaluation procedure documented
+- [x] Repository README provides reproduction instructions
 
-- [ ] Data source documented
-- [ ] Code runs from beginning to end
-- [ ] Computational environment identified
-- [ ] Software/packages documented
-- [ ] Package versions documented when relevant
-- [ ] Random seed documented when applicable
-- [ ] Key preprocessing steps documented
-- [ ] Evaluation procedure documented
-- [ ] Repository README provides reproduction instructions
 
 **What was the greatest reproducibility challenge you encountered?**
 
-[Write approximately 75–100 words.]
+The primary reproducibility challenge was translating a survey-level claim into a controlled experiment because Klein et al. [-@klein2026plasticity] do not provide a single empirical experiment that can be directly reproduced. This required defining a transparent proxy experiment without presenting it as an original experiment from the survey. Reproducibility was strengthened by generating all data synthetically, fixing the random seed at 735, implementing the learning procedure in base R, and storing the complete analysis script in the GitHub repository. The script was also tested from a restarted R session to confirm that it runs from beginning to end.
+
 
 # 8. Extend
 
-## What did the replication reveal that you would investigate next?
-
-Propose **one** meaningful extension.
-
-Examples might include:
-
-- testing another model;
-- adding a stronger baseline;
-- evaluating another population or dataset;
-- examining temporal generalization;
-- testing fairness across groups;
-- evaluating model calibration;
-- examining interpretability; or
-- testing robustness under changing conditions.
-
-Explain why the extension would add knowledge rather than merely add complexity.
-
-[Write approximately 100–150 words.]
+A meaningful extension would test whether the observed learning behavior persists in a neural network trained on a real longitudinal biomedical dataset. Instead of deliberately reversing a synthetic biomarker relationship, nonstationarity could arise from clinically plausible temporal or population shifts, such as changes in patient demographics, biomarker distributions, or measurement practices. The same Stability–Plasticity Diagnostic could then compare a previously trained network with a newly initialized model by measuring retention, post-change learning, adaptation rate, and predictive performance. This extension would help determine whether the pattern observed in the simplified logistic regression experiment generalizes to a more complex predictive model and realistic biomedical data. It would therefore provide stronger evidence about the practical relevance of plasticity under changing biomedical conditions rather than simply increasing model complexity.
 
 # Replication Verdict
 
-Select the statement that best represents your findings:
-
 - [ ] **Reproduced** — The central result was substantially reproduced.
-- [ ] **Partially Reproduced** — Some findings were reproduced, but meaningful differences remain.
+- [x] **Partially Reproduced** — Some findings were reproduced, but meaningful differences remain.
 - [ ] **Not Reproduced** — The central result was not reproduced.
-- [ ] **Not Directly Comparable** — A proxy replication produced useful methodological insight, but numerical comparison is not appropriate.
+- [ ] **Inconclusive** — The available evidence does not support a sufficiently clear conclusion.
 
-In **2–3 sentences**, defend your verdict.
+The broader learning pattern was partially reproduced: after the condition changed, the previously trained model continued learning but adapted less effectively than a fresh model, while performance on the original condition declined. This provides evidence of a stability–plasticity tradeoff in the controlled proxy experiment, but it does not establish complete plasticity loss or directly reproduce the deep reinforcement learning evidence synthesized by Klein et al. [-@klein2026plasticity].
 
-[Write here.]
+
+
 
 # References
 
 ::: {#refs}
 :::
+
+
+
